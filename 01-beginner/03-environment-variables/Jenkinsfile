@@ -1,0 +1,17 @@
+pipeline {
+    agent any 
+    environment {
+        APP_NAME = 'my-app'
+        APP_VERSION = '1.0.0'
+        DEPLOY_ENV = 'staging'
+
+    }
+    stages {
+        stage('Print Info') {
+            steps {
+                echo "Deploying ${APP_NAME} version ${APP_VERSION} to ${DEPLOY_ENV}"
+                sh "echo App: $APP_NAME"
+            }
+        }
+    }
+}
