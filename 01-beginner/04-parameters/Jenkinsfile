@@ -1,0 +1,21 @@
+pipeline {
+    agent any 
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run unit tests?')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Target environment')
+    }
+    stages {
+        stage('Info') {
+            steps {
+                echo "Branch: ${params.BRANCH_NAME}"
+                echo "Run Tests: ${params.RUN_TESTS}"
+                echo "Environment: ${params.ENVIRONMENT}"
+            }
+        }
+        stage('Test') {
+            when { expression { params.RUN_TESTS == true } }
+            steps { echo 'Running tests...'}
+        }
+    }
+}
