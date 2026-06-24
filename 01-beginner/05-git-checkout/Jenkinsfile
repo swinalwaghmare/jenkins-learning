@@ -1,0 +1,33 @@
+pipeline {
+    agent any 
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/swinalwaghmare/jenkins-learning.git',
+                    credentialsId: 'github-credentials'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'ls -la'
+                sh 'cat README.md'
+            }
+        }
+    }
+}
+
+
+// Kind: Username with password
+// Username: your-github-username
+// Password: github-personal-access-token
+// ID: github-credentials
+
+// Errors
+// Everything should inside the git tag like branch, url and creadential
+// Inside creadentials ID name written incorrectly 
+
+// What it does
+// - Downloading the source code from github to workspace at checkout stage.
+// - It internally performing clone and checkout to main 
+// - Then we are just reading the readme file           
