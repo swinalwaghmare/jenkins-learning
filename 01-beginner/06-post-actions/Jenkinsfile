@@ -6,6 +6,9 @@ pipeline {
             steps {
                 dir('sample-apps/java-app') 
                 {
+                    sh 'java -version'
+                    sh 'javac -version'
+                    sh 'mvn -version'
                     sh 'mvn clean package'
                 }
             }
