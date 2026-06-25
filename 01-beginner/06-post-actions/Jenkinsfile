@@ -1,6 +1,12 @@
 pipeline {
     agent any 
     stages {
+        stage('Debug') {
+            steps {
+                sh 'pwd'
+                sh 'find . -name pom.xml'
+            }
+        }
         stage('Build'){
             
             steps {
