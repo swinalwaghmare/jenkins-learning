@@ -1,16 +1,10 @@
 pipeline {
     agent any 
     stages {
-        stage('Debug') {
-            steps {
-                sh 'pwd'
-                sh 'find . -name pom.xml'
-            }
-        }
         stage('Build'){
             
             steps {
-                dir('/sample-apps/java-app') 
+                dir('sample-apps/java-app') 
                 {
                     sh 'mvn clean package'
                 }
