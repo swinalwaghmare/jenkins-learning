@@ -1,0 +1,29 @@
+pipeline {
+    agent any 
+    stages {
+        stage('Build'){
+            
+            steps {
+                dir('/sample-apps/java-app') 
+                {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Piepline finished - cleaning up'
+            cleanWs()
+        }
+        success {
+            echo 'Build SUCCESSFUL!'
+        }
+        failure {
+            echo 'Build Failed'
+        }
+        unstable {
+            echo 'Build is UNSTABLE - same tests failed'
+        }
+    }
+}
