@@ -18,10 +18,10 @@ pipeline{
                         }
                     }
                 }
-                stage('Security Scan') {
+                stage('Package Info') {
                     steps {
                         dir('sample-apps/java-app') {
-                            sh 'mvn dependency-check:check' 
+                            sh 'mvn help:effective-pom' 
                         }
                     }
                  }
