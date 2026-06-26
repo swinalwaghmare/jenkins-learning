@@ -1,0 +1,38 @@
+pipeline{
+    agent any
+    stages {
+        stage('Build') {
+            steps { 
+
+                dir('sample-apps/java-app') {
+                    sh 'mvn clean package -DskipTests'
+                    }
+                }       
+            }
+        stage('Test in Parallel') {
+            parallel {
+                stage('Unit Tests') {
+                    steps { 
+                        dir('sample-apps/java-app') {
+                            sh 'mvn test -Dtest=UnitTests'
+                        }
+                    }
+                }
+                stage('Integration Tests') {
+                    steps { 
+                        dir('sample-apps/java-app') {
+                            sh 'mvn test -Dtest=IntegrationTests'
+                        } 
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        dir('sample-apps/java-app') {
+                            steps { sh 'mvn dependency-check:check' }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
