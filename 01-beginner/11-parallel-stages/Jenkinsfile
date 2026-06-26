@@ -14,24 +14,17 @@ pipeline{
                 stage('Unit Tests') {
                     steps { 
                         dir('sample-apps/java-app') {
-                            sh 'mvn test -Dtest=UnitTests'
+                            sh 'mvn test '
                         }
-                    }
-                }
-                stage('Integration Tests') {
-                    steps { 
-                        dir('sample-apps/java-app') {
-                            sh 'mvn test -Dtest=IntegrationTests'
-                        } 
                     }
                 }
                 stage('Security Scan') {
                     steps {
                         dir('sample-apps/java-app') {
-                            steps { sh 'mvn dependency-check:check' }
+                            sh 'mvn dependency-check:check' 
                         }
                     }
-                }
+                 }
             }
         }
     }
