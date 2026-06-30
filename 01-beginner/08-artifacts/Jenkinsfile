@@ -1,0 +1,27 @@
+pipeline {
+    agent any 
+    stages {
+        stage('Build')  {
+            steps {
+                dir('sample-apps/java-app') 
+                {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                dir('sample-apps/java-app') 
+                {
+                    sh 'mvn test'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            junit 'target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+    }
+}
