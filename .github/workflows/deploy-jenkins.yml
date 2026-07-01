@@ -76,5 +76,4 @@ jobs:
         working-directory: ./terraform
         run: |
           PASSWORD=$(terraform output -raw jenkins_initial_admin_password)
-          echo "::add-mask::$PASSWORD"
           echo "Jenkins initial admin password: $PASSWORD" >> "$GITHUB_STEP_SUMMARY"
