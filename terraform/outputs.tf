@@ -13,7 +13,13 @@ output "jenkins_url" {
   value       = "http://${aws_instance.jenkins_server.public_ip}:8080"
 }
 
-output "ssh_command" {
-  description = "Command to SSH into the instance"
-  value       = "ssh -i <your-key>.pem ubuntu@${aws_instance.jenkins_server.public_ip}"
+output "jenkins_initial_admin_password" {
+  description = "Initial admin password to unlock Jenkins (paste into http://<public_ip>:8080)"
+  value       = trimspace(data.local_file.jenkins_password.content)
+  sensitive   = true
+}
+
+output "ssm_connect_command" {
+  description = "Command to open a shell on the instance without any SSH key (uses AWS Session Manager)"
+  value       = "aws ssm start-session --target ${aws_instance.jenkins_server.id}"
 }

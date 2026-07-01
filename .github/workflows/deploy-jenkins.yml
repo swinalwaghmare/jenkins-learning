@@ -1,0 +1,80 @@
+name: Deploy Jenkins EC2 via Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: "AWS region to deploy into"
+        required: false
+        default: "us-east-1"
+        type: string
+      action:
+        description: "Terraform action to run"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action }}
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ github.event.inputs.aws_region }}
+      TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      # Only plan-and-display, no apply
+      - name: Terraform Plan (plan-only)
+        if: ${{ github.event.inputs.action == 'plan' }}
+        working-directory: ./terraform
+        run: terraform plan -input=false
+
+      # Plan + apply run in the SAME step so the plan file is
+      # guaranteed to exist when apply uses it.
+      - name: Terraform Plan and Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: ./terraform
+        run: |
+          terraform plan -input=false -out=tfplan
+          terraform apply -input=false -auto-approve tfplan
+
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        working-directory: ./terraform
+        run: terraform destroy -input=false -auto-approve
+
+      - name: Show Outputs
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: ./terraform
+        run: terraform output
+
+      - name: Show Jenkins Admin Password
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: ./terraform
+        run: |
+          PASSWORD=$(terraform output -raw jenkins_initial_admin_password)
+          echo "::add-mask::$PASSWORD"
+          echo "Jenkins initial admin password: $PASSWORD" >> "$GITHUB_STEP_SUMMARY"
