@@ -1,0 +1,67 @@
+name: Deploy Jenkins EC2 via terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region: 
+         description: "AWS region to deploy into"
+         required: false
+         default: "us-east-1"
+         type: string
+      action:
+       description: "Terraform action to run"
+       required: true
+       default: "apply"
+       type: choice
+       options:
+          - plan
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.input.action }}
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ github.event.inputs.aws_region }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+    
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: ${{ github.event.inputs.action == 'plan' || github.event.input.action == 'apply'}}
+        working-directory: ./terraform
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: ./terraform
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Terrafom Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        working-directory: ./terraform
+        run: terraform destroy -input=false -auto-approve
+
+      - name: Show outputs
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        working-directory: ./terraform
+        run: terraform output
+          
+        
